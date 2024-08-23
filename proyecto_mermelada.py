@@ -32,11 +32,10 @@ def draw_button(text, color, rect, surface):
 def button_click(pos, rect):
     return rect.collidepoint(pos)
 
-
 def main_menu():
     run = True
-    while run:    
-        # Rectangulo principal 
+    while run:
+        # Rectangulo principal
         rect_width_percentage = 0.8
         rect_height_percentage = 0.2
         rect_x_percentage = 0.1
@@ -75,8 +74,7 @@ def main_menu():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
@@ -86,11 +84,7 @@ def main_menu():
                     pygame.quit()
                     sys.exit()
 
-        for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                        run = False
         pygame.display.flip()
-
 
 # Ejecutar el menú principal
 main_menu()
