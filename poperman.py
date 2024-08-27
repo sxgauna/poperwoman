@@ -4,15 +4,25 @@ import constant
 from personaje import Personaje
 from weapons import Weapon
 
-pygame.init()
-screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
-pygame.display.set_caption("Poperman")
-
+#FUNCIONES
 def escalar_img(image,scale):
     w = image.get_width()
     h = image.get_height()
     nueva_imagen = pygame.transform.scale(image, (w * scale, h * scale))
     return nueva_imagen
+
+def contar_elementos(directorio):
+    return len(os.listdir(directorio))
+
+def nombre_carpetas(directorio):
+    return os.listdir(directorio)
+
+
+
+pygame.init()
+screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
+pygame.display.set_caption("Poperman")
+
 
 #IMPORTAR IMAGENES
 
@@ -22,6 +32,21 @@ for i in range (7):
     img = pygame.image.load(f"assets//images//characters//player1//char{i}.png").convert_alpha()
     img = escalar_img(img, constant.CHAR_ESCALA)
     animaciones.append(img)
+
+#Enemigos
+directorio_enemigos = "assets//images//characters//enemies"
+tipo_enemigos = nombre_carpetas(directorio_enemigos)
+animaciones_enemigo = []
+for eni in tipo_enemigos:
+    lista_temp = []
+    ruta_temp = f"assets//images//characters//enemies//{eni}"
+    num_animaciones = contar_elementos(ruta_temp)
+    for i in range(num_animaciones):
+        img_enemigo = pygame.image.load(f"{ruta_temp}//{eni}_{i + 1}.png").convert_alpha()
+        img_enemigo = escalar_img(img_enemigo, constant.ENEMY_ESCALA)
+        lista_temp.append(img_enemigo)
+    animaciones_enemigo.append(lista_temp)
+
 
 #Weapon
 imagen_pistola = pygame.image.load(f"assets//images//weapons//weapon1.png").convert_alpha()
@@ -42,6 +67,17 @@ grupo_balas = pygame.sprite.Group()
 
 #CREAR JUGADOR DE CLASE PERSONAJE
 player1 = Personaje(200, 500, animaciones)
+
+#CREAR ENEMIGO 1 DE CLASE PERSONAJE
+enemy1 = Personaje(400, 300, animaciones_enemigo[0])
+
+#CREAR ENEMIGO 2 DE CLASE PERSONAJE
+enemy2 = Personaje(200, 200, animaciones_enemigo[1])
+
+#LISTA ENEMIGOS
+lista_enemigos = []
+lista_enemigos.append(enemy1)
+lista_enemigos.append(enemy2)
 
 #Definimos variables movimiento del jugador
 move_up = False
@@ -76,6 +112,9 @@ while run:
     player1.move(delta_x, delta_y)
 
     player1.update()
+    for ene in lista_enemigos:
+        ene.update()
+
     bala = weapon1.update(player1)
     if bala:
         grupo_balas.add(bala)
@@ -85,6 +124,8 @@ while run:
 
 
     player1.draw(screen)
+    for ene in lista_enemigos:
+        ene.draw(screen)
     weapon1.draw(screen)
 
     for bala in grupo_balas:
