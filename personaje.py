@@ -2,7 +2,9 @@ import pygame
 import constant
 
 class Personaje():
-    def __init__(self, x, y, animaciones):
+    def __init__(self, x, y, animaciones, energy):
+        self.energy = energy
+        self.vivo = True
         self.flip = False #La idea es que el personaje se voltee si camina hacia la izquierda
 
         self.animaciones = animaciones
@@ -39,6 +41,12 @@ class Personaje():
         self.shape.y = self.shape.y + delta_y
 
     def update(self):
+        if self.energy <= 0:
+            self.energy = 0
+            self.vivo = False
+            #self.kill no funciona todavia porque hay que armarlo
+
+
         cooldown_animation = 100 #milisegundos
         self.image = self.animaciones[self.frame_index]
         if pygame.time.get_ticks() - self.update_time >= cooldown_animation:
@@ -48,11 +56,13 @@ class Personaje():
             self.frame_index = 0
 
 
+
     def draw(self, interfaz):
         imagen_flip = pygame.transform.flip(self.image, self.flip, False)
         interfaz.blit(imagen_flip, self.shape)
         #HITBOX
         #pygame.draw.rect(interfaz, constant.YELLOW, self.shape, 1)
+
 
 
 

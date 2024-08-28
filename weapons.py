@@ -1,6 +1,7 @@
 import pygame
 import constant
 import math
+import random
 
 class Weapon():
     def __init__(self, image, imagen_bala):
@@ -68,7 +69,9 @@ class Bullet(pygame.sprite.Sprite):
         self.delta_x = math.cos(math.radians(self.angulo)) * constant.SPEED_BALAS
         self.delta_y = -math.sin(math.radians(self.angulo)) * constant.SPEED_BALAS
 
-    def update(self):
+    def update(self, lista_enemigos):
+        damage = 0
+        pos_damage = None
         self.rect.x += self.delta_x
         self.rect.y += self.delta_y
 
@@ -76,5 +79,18 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.right < 0 or self.rect.left > constant.screen_width or self.rect.bottom < 0 or self.rect.top > constant.screen_height:
             self.kill()
 
+        #Verifica coalición con enemigo
+        for enemigo in lista_enemigos:
+            if enemigo.shape.colliderect(self.rect):
+                damage = 15 + random.randint(-7,7)
+                pos_damage = enemigo.shape
+                enemigo.energy -= damage
+                self.kill()
+                break
+        return damage, pos_damage
+
     def draw(self, interfaz):
         interfaz.blit(self.image, (self.rect.centerx, self.rect.centery))
+
+
+
