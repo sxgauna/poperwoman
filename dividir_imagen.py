@@ -32,6 +32,6 @@ def dividir_guardar_imagen(ruta_imagen, carpeta_destino, divisiones_x_columna):
         print(f"An error occurred: {e}")
 
 # Example usage
-dividir_guardar_imagen("assets/images/tiles/tileset1.png", "assets/images/tiles/", 12)
+dividir_guardar_imagen("assets/images/supertileset.png", "assets/images/tiles/", 18)
 
 

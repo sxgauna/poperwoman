@@ -49,6 +49,20 @@ for i in range (constant.TILE_TYPES):
     tile_image = pygame.transform.scale(tile_image, (constant.TILE_SIZE, constant.TILE_SIZE))
     tile_list.append(tile_image)
 
+
+poti_roja = pygame.image.load("assets//images//items//potion//p1.png")
+poti_roja = escalar_img(poti_roja, 0.05)
+coin_images = []
+ruta_img = "assets//images//items//coins"
+num_coin_images = contar_elementos(ruta_img)
+for i in range(num_coin_images):
+    img = pygame.image.load(f"assets//images//items//coins//c{i+1}.png")
+    img = escalar_img(img, 0.1)
+    coin_images.append(img)
+
+item_imagenes = [coin_images, [poti_roja]]
+
+
 # W O R L D - D A T A
 world_data = []
 
@@ -65,7 +79,7 @@ with open("assets//images//levels//level1.csv", newline='') as csvfile:
             world_data[x][y] = int(columna)
 
 world = Mundo()
-world.process_data(world_data, tile_list)
+world.process_data(world_data, tile_list, item_imagenes)
 
 
 # I N I T
@@ -73,6 +87,8 @@ pygame.init()
 font = pygame.font.Font("assets//fonts//font1.otf", 35)
 screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
 pygame.display.set_caption("Poperman")
+posicion_pantalla = [0, 0]
+nivel = 1
 
 
 # S P R I T E S
@@ -101,17 +117,6 @@ imagen_pistola = escalar_img(imagen_pistola, constant.WEAPON_ESCALA)
 imagen_bala = pygame.image.load(f"assets//images//weapons//pop.png").convert_alpha()
 imagen_bala = escalar_img(imagen_bala, constant.WEAPON_ESCALA)
 
-pocion_roja = pygame.image.load(f"assets//images//items//potion//p1.png")
-pocion_roja = escalar_img(pocion_roja, constant.POTION_ESCALA)
-
-coin_images = []
-ruta_img = "assets//images//items//coins"
-num_coin_images = contar_elementos(ruta_img)
-for i in range(num_coin_images):
-    img = pygame.image.load(f"assets//images//items//coins//c{i+1}.png").convert_alpha()
-    img = escalar_img(img, constant.COIN_ESCALA)
-    coin_images.append(img)
-
 corazon_vacio = pygame.image.load(f"assets//images//items//h0.png").convert_alpha()
 corazon_vacio = escalar_img(corazon_vacio, constant.HEART_ESCALA)
 corazon_mitad = pygame.image.load(f"assets//images//items//h1.png").convert_alpha()
@@ -126,20 +131,21 @@ grupo_damage_text = pygame.sprite.Group() # TEXTO - DAMAGE TEXT
 grupo_balas = pygame.sprite.Group()
 grupo_items = pygame.sprite.Group()
 
+for item in world.lista_item:
+    grupo_items.add(item)
+
 
 # C L A S S E S
 weapon1 = Weapon(imagen_pistola, imagen_bala)
-player1 = Personaje(200, 500, animaciones, 100)
-enemy1 = Personaje(400, 300, animaciones_enemigo[0], 100)
-enemy2 = Personaje(200, 200, animaciones_enemigo[1], 100)
-coin = Item(350,25, 0, coin_images)
-grupo_items.add(coin)
-potion = Item(380,55, 1, [pocion_roja])
-grupo_items.add(potion)
+player1 = Personaje(200, 500, animaciones, 100, 1)
+enemy1 = Personaje(400, 300, animaciones_enemigo[0], 100, 2)
+enemy2 = Personaje(200, 200, animaciones_enemigo[1], 100, 2)
 
 lista_enemigos = []
 lista_enemigos.append(enemy1)
 lista_enemigos.append(enemy2)
+
+
 
 
 # M O V E
@@ -175,11 +181,14 @@ while run:
     if move_down:
         delta_y = constant.SPEED
 
-    player1.move(delta_x, delta_y) #MOVER AL JUGADOR
+    posicion_pantalla = player1.move(delta_x, delta_y) #MOVER AL JUGADOR
 
     # U P D A T E
+    world.update(posicion_pantalla)
+
     player1.update()
     for ene in lista_enemigos:
+        ene.enemigos(posicion_pantalla)
         ene.update()
     bala = weapon1.update(player1)
     if bala:
@@ -192,8 +201,8 @@ while run:
             else:
                 damage_text = DamageText(pos_damage.centerx, pos_damage.centery, "-" + str(damage), font, constant.RED)
             grupo_damage_text.add(damage_text)
-    grupo_damage_text.update()
-    grupo_items.update(player1)
+    grupo_damage_text.update(posicion_pantalla)
+    grupo_items.update(posicion_pantalla, player1)
 
     # D R A W
 
@@ -209,8 +218,9 @@ while run:
 
     vida_jugador()
 
-    dibujar_texto(f"Score: {player1.score}", font, constant.BLUE, 700, 5 )
+    dibujar_texto(f"Score: {player1.score}", font, constant.BLUE, 1000, 5 )
     grupo_items.draw(screen)
+    dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
 
 
     # E V E N T S

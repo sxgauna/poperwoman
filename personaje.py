@@ -2,7 +2,7 @@ import pygame
 import constant
 
 class Personaje():
-    def __init__(self, x, y, animaciones, energy):
+    def __init__(self, x, y, animaciones, energy, type):
         self.score = 0
         self.energy = energy
         self.vivo = True
@@ -16,30 +16,45 @@ class Personaje():
 
         self.shape = self.image.get_rect()
         self.shape.center = (x,y)
+        self.type = type
 
     def move(self, delta_x, delta_y):
+        posicion_pantalla = [0, 0]
+
         if delta_x < 0 :
             self.flip = True
         if delta_x > 0 :
             self.flip = False
 
-          #Limites para el jugador. Evitar que se salga de la ventana de juego
-        if self.shape.top < 0:
-            self.shape.top=0
-
-        if self.shape.bottom > constant.screen_height:
-            self.shape.bottom = constant.screen_height
-
-        if self.shape.right > constant.screen_width:
-            self.shape.right = constant.screen_width
-
-        if self.shape.left < 0:
-            self.shape.left =0
-
-
-
         self.shape.x = self.shape.x + delta_x
         self.shape.y = self.shape.y + delta_y
+
+        #Mueve la cámara de acuerdo a la posición del personaje
+        if self.type == 1:
+            # Verificar límite derecho
+            if self.shape.right > (constant.screen_width - constant.LIMITE_PANTALLA):
+                posicion_pantalla[0] = (constant.screen_width - constant.LIMITE_PANTALLA) - self.shape.right
+                self.shape.right = constant.screen_width - constant.LIMITE_PANTALLA
+
+            # Verificar límite izquierdo
+            if self.shape.left < constant.LIMITE_PANTALLA:
+                posicion_pantalla[0] = constant.LIMITE_PANTALLA - self.shape.left
+                self.shape.left = constant.LIMITE_PANTALLA
+
+            # Verificar límite inferior
+            if self.shape.bottom > (constant.screen_height - constant.LIMITE_PANTALLA):
+                posicion_pantalla[1] = (constant.screen_height - constant.LIMITE_PANTALLA) - self.shape.bottom
+                self.shape.bottom = constant.screen_height - constant.LIMITE_PANTALLA
+
+            # Verificar límite superior
+            if self.shape.top < constant.LIMITE_PANTALLA:
+                posicion_pantalla[1] = constant.LIMITE_PANTALLA - self.shape.top
+                self.shape.top = constant.LIMITE_PANTALLA
+            return posicion_pantalla
+
+    def enemigos(self, posicion_pantalla):
+        self.shape.x += posicion_pantalla[0]
+        self.shape.y += posicion_pantalla[1]
 
     def update(self):
         if self.energy <= 0:

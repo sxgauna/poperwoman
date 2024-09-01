@@ -11,7 +11,9 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
 
-    def update(self, personaje):
+    def update(self, posicion_pantalla, personaje):
+        self.rect.x += posicion_pantalla[0]
+        self.rect.y += posicion_pantalla[1]
         #Compruebo colisión entre personaje e item
         if self.rect.colliderect(personaje.shape):
             if self.item_type == 0:
