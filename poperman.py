@@ -1,9 +1,13 @@
 import pygame
 import os
 import constant
+import csv
 from text import DamageText
 from personaje import Personaje
 from weapons import Weapon
+from items import Item
+from world import Mundo
+
 
 # D E F
 def escalar_img(image,scale):
@@ -17,6 +21,52 @@ def contar_elementos(directorio):
 
 def nombre_carpetas(directorio):
     return os.listdir(directorio)
+
+def vida_jugador():
+    c_mitad_dibujado = False
+    for i in range(4):
+        if player1.energy >= ((i+1)*25):
+            screen.blit(corazon_lleno, (5+i*50,15))
+        elif player1.energy % 25 > 0:
+            screen.blit(corazon_mitad, (5+i*50,15))
+            c_mitad_dibujado = True
+        else:
+            screen.blit(corazon_vacio, (5+i*50,15))
+
+def dibujar_texto(texto, fuente, color, x, y):
+    img = fuente.render(texto, True, color)
+    screen.blit(img, (x,y))
+()
+
+def dibujar_grid():
+    for i in range(30):
+        pygame.draw.line(screen, constant.WHITE, (i * constant.GRID_SIZE, 0),(i * constant.GRID_SIZE,constant.screen_height))
+        pygame.draw.line(screen, constant.WHITE, (0, i * constant.GRID_SIZE),(constant.screen_width, i * constant.GRID_SIZE))
+
+tile_list = []
+for i in range (constant.TILE_TYPES):
+    tile_image = pygame.image.load(f"assets//images//tiles//tile ({ i }).png")
+    tile_image = pygame.transform.scale(tile_image, (constant.TILE_SIZE, constant.TILE_SIZE))
+    tile_list.append(tile_image)
+
+# W O R L D - D A T A
+world_data = []
+
+
+#Si existiese algun valor falante en world_data mostramos un tile default
+for fila in range(constant.FILAS):
+    filas =  [5] * constant.COLUMNAS
+    world_data.append(filas)
+
+with open("assets//images//levels//level1.csv", newline='') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',')
+    for x, fila in enumerate(reader):
+        for y, columna in enumerate(fila):
+            world_data[x][y] = int(columna)
+
+world = Mundo()
+world.process_data(world_data, tile_list)
+
 
 # I N I T
 pygame.init()
@@ -51,17 +101,46 @@ imagen_pistola = escalar_img(imagen_pistola, constant.WEAPON_ESCALA)
 imagen_bala = pygame.image.load(f"assets//images//weapons//pop.png").convert_alpha()
 imagen_bala = escalar_img(imagen_bala, constant.WEAPON_ESCALA)
 
+pocion_roja = pygame.image.load(f"assets//images//items//potion//p1.png")
+pocion_roja = escalar_img(pocion_roja, constant.POTION_ESCALA)
+
+coin_images = []
+ruta_img = "assets//images//items//coins"
+num_coin_images = contar_elementos(ruta_img)
+for i in range(num_coin_images):
+    img = pygame.image.load(f"assets//images//items//coins//c{i+1}.png").convert_alpha()
+    img = escalar_img(img, constant.COIN_ESCALA)
+    coin_images.append(img)
+
+corazon_vacio = pygame.image.load(f"assets//images//items//h0.png").convert_alpha()
+corazon_vacio = escalar_img(corazon_vacio, constant.HEART_ESCALA)
+corazon_mitad = pygame.image.load(f"assets//images//items//h1.png").convert_alpha()
+corazon_mitad = escalar_img(corazon_mitad, constant.HEART_ESCALA)
+corazon_lleno = pygame.image.load(f"assets//images//items//h2.png").convert_alpha()
+corazon_lleno = escalar_img(corazon_lleno, constant.HEART_ESCALA)
+
+
+# G R O U P S
+
+grupo_damage_text = pygame.sprite.Group() # TEXTO - DAMAGE TEXT
+grupo_balas = pygame.sprite.Group()
+grupo_items = pygame.sprite.Group()
+
 
 # C L A S S E S
 weapon1 = Weapon(imagen_pistola, imagen_bala)
-grupo_damage_text = pygame.sprite.Group() # TEXTO - DAMAGE TEXT
-grupo_balas = pygame.sprite.Group()
 player1 = Personaje(200, 500, animaciones, 100)
 enemy1 = Personaje(400, 300, animaciones_enemigo[0], 100)
 enemy2 = Personaje(200, 200, animaciones_enemigo[1], 100)
+coin = Item(350,25, 0, coin_images)
+grupo_items.add(coin)
+potion = Item(380,55, 1, [pocion_roja])
+grupo_items.add(potion)
+
 lista_enemigos = []
 lista_enemigos.append(enemy1)
 lista_enemigos.append(enemy2)
+
 
 # M O V E
 move_up = False
@@ -75,8 +154,10 @@ clock = pygame.time.Clock()
 run = True
 
 while run:
+
     clock.tick(constant.FPS)
     screen.fill(constant.BLACK)
+    dibujar_grid()
 
     #Movimiento del jugador
     delta_x = 0
@@ -111,10 +192,13 @@ while run:
             else:
                 damage_text = DamageText(pos_damage.centerx, pos_damage.centery, "-" + str(damage), font, constant.RED)
             grupo_damage_text.add(damage_text)
-    print(grupo_balas)
     grupo_damage_text.update()
+    grupo_items.update(player1)
 
     # D R A W
+
+    world.draw(screen)
+
     player1.draw(screen)
     for ene in lista_enemigos:
         ene.draw(screen)
@@ -122,6 +206,12 @@ while run:
     for bala in grupo_balas:
         bala.draw(screen)
     grupo_damage_text.draw(screen)
+
+    vida_jugador()
+
+    dibujar_texto(f"Score: {player1.score}", font, constant.BLUE, 700, 5 )
+    grupo_items.draw(screen)
+
 
     # E V E N T S
     for event in pygame.event.get():
@@ -147,6 +237,7 @@ while run:
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 move_down = False
     pygame.display.update()
+
 
 
 pygame.quit()

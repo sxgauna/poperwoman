@@ -3,6 +3,7 @@ import constant
 
 class Personaje():
     def __init__(self, x, y, animaciones, energy):
+        self.score = 0
         self.energy = energy
         self.vivo = True
         self.flip = False #La idea es que el personaje se voltee si camina hacia la izquierda
