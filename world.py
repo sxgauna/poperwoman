@@ -1,7 +1,10 @@
 import constant
 from items import Item
+from personaje import Personaje
 
-obstaculos = [0, 1, 2, 3, 4, 5, 6, 7]
+obstaculos = [0, 2, 72, 19, 20, 21, 22, 23, 24,
+90,91,92,93,94,95,96,97,6, 7,
+79,61,72,43,25,7,72,54,36,18 ]
 
 class Mundo():
     def __init__(self):
@@ -9,8 +12,9 @@ class Mundo():
         self.obstaculos_tiles = []
         self.exit_tile = None
         self.lista_item = []
+        self.lista_enemigo = []
 
-    def process_data(self, data, tile_list, item_imagenes):
+    def process_data(self, data, tile_list, item_imagenes, animaciones_enemigo):
         self.level_lenght = len(data)
         for y, row in enumerate(data):
             for x, tile in enumerate(row):
@@ -32,9 +36,15 @@ class Mundo():
                     self.lista_item.append(moneda)
             #POTI ROJA
                 elif tile == 16:
-                    moneda = Item(image_x, image_y, 0, item_imagenes[1])
+                    pocion_roja = Item(image_x, image_y, 0, item_imagenes[1])
                     tile_data[0] = tile_list[56]
-                    self.lista_item.append(moneda)
+                    self.lista_item.append(pocion_roja)
+            #ENEMIGO1
+                elif tile == 27:
+                    ene1 = Personaje(image_x, image_y, animaciones_enemigo[1], 250, 2)
+                    tile_data[0] = tile_list[56]
+                    self.lista_enemigo.append(ene1)
+
 
 
                 self.map_tiles.append(tile_data)

@@ -43,6 +43,16 @@ def dibujar_grid():
         pygame.draw.line(screen, constant.WHITE, (i * constant.GRID_SIZE, 0),(i * constant.GRID_SIZE,constant.screen_height))
         pygame.draw.line(screen, constant.WHITE, (0, i * constant.GRID_SIZE),(constant.screen_width, i * constant.GRID_SIZE))
 
+# I N I T
+pygame.init()
+font = pygame.font.Font("assets//fonts//font1.otf", 35)
+screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
+pygame.display.set_caption("Poperman")
+posicion_pantalla = [0, 0]
+nivel = 1
+
+
+# NI IDEA, COSAS QUE PONE EL CHABON
 tile_list = []
 for i in range (constant.TILE_TYPES):
     tile_image = pygame.image.load(f"assets//images//tiles//tile ({ i }).png")
@@ -63,9 +73,23 @@ for i in range(num_coin_images):
 item_imagenes = [coin_images, [poti_roja]]
 
 
+
+directorio_enemigos = "assets//images//characters//enemies"
+tipo_enemigos = nombre_carpetas(directorio_enemigos)
+
+animaciones_enemigo = []
+for eni in tipo_enemigos:
+    lista_temp = []
+    ruta_temp = f"assets//images//characters//enemies//{eni}"
+    num_animaciones = contar_elementos(ruta_temp)
+    for i in range(num_animaciones):
+        img_enemigo = pygame.image.load(f"{ruta_temp}//{eni}_{i + 1}.png").convert_alpha()
+        img_enemigo = escalar_img(img_enemigo, constant.ENEMY_ESCALA)
+        lista_temp.append(img_enemigo)
+    animaciones_enemigo.append(lista_temp)
+
 # W O R L D - D A T A
 world_data = []
-
 
 #Si existiese algun valor falante en world_data mostramos un tile default
 for fila in range(constant.FILAS):
@@ -79,17 +103,7 @@ with open("assets//images//levels//level1.csv", newline='') as csvfile:
             world_data[x][y] = int(columna)
 
 world = Mundo()
-world.process_data(world_data, tile_list, item_imagenes)
-
-
-# I N I T
-pygame.init()
-font = pygame.font.Font("assets//fonts//font1.otf", 35)
-screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
-pygame.display.set_caption("Poperman")
-posicion_pantalla = [0, 0]
-nivel = 1
-
+world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
 
 # S P R I T E S
 animaciones = []
@@ -98,18 +112,7 @@ for i in range (7):
     img = escalar_img(img, constant.CHAR_ESCALA)
     animaciones.append(img)
 
-directorio_enemigos = "assets//images//characters//enemies"
-tipo_enemigos = nombre_carpetas(directorio_enemigos)
-animaciones_enemigo = []
-for eni in tipo_enemigos:
-    lista_temp = []
-    ruta_temp = f"assets//images//characters//enemies//{eni}"
-    num_animaciones = contar_elementos(ruta_temp)
-    for i in range(num_animaciones):
-        img_enemigo = pygame.image.load(f"{ruta_temp}//{eni}_{i + 1}.png").convert_alpha()
-        img_enemigo = escalar_img(img_enemigo, constant.ENEMY_ESCALA)
-        lista_temp.append(img_enemigo)
-    animaciones_enemigo.append(lista_temp)
+
 
 imagen_pistola = pygame.image.load(f"assets//images//weapons//weapon1.png").convert_alpha()
 imagen_pistola = escalar_img(imagen_pistola, constant.WEAPON_ESCALA)
@@ -137,15 +140,11 @@ for item in world.lista_item:
 
 # C L A S S E S
 weapon1 = Weapon(imagen_pistola, imagen_bala)
-player1 = Personaje(200, 500, animaciones, 100, 1)
-enemy1 = Personaje(400, 300, animaciones_enemigo[0], 100, 2)
-enemy2 = Personaje(200, 200, animaciones_enemigo[1], 100, 2)
+player1 = Personaje(500, 300, animaciones, 100, 1)
 
 lista_enemigos = []
-lista_enemigos.append(enemy1)
-lista_enemigos.append(enemy2)
-
-
+for ene in world.lista_enemigo:
+    lista_enemigos.append(ene)
 
 
 # M O V E
@@ -181,7 +180,7 @@ while run:
     if move_down:
         delta_y = constant.SPEED
 
-    posicion_pantalla = player1.move(delta_x, delta_y) #MOVER AL JUGADOR
+    posicion_pantalla = player1.move(delta_x, delta_y, world.obstaculos_tiles) #MOVER AL JUGADOR
 
     # U P D A T E
     world.update(posicion_pantalla)

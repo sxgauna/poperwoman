@@ -28,8 +28,8 @@
             "scale": 1.6268749999999998,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 239.72339608144452,
-                "y": 213.5996926623127
+                "x": 275.0672301190934,
+                "y": 208.37495197848637
             }
         },
         "tiles/tileset1.tsx": {
@@ -40,6 +40,7 @@
     "last.externalTilesetPath": "V:/PRIVADO/PROYECTOS/GITHUB/pygame-poperman/assets/images",
     "last.imagePath": "V:/PRIVADO/PROYECTOS/GITHUB/pygame-poperman/assets/images",
     "map.lastUsedExportFilter": "All Files (*)",
+    "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "openFiles": [

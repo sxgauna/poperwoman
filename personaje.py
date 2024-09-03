@@ -18,7 +18,7 @@ class Personaje():
         self.shape.center = (x,y)
         self.type = type
 
-    def move(self, delta_x, delta_y):
+    def move(self, delta_x, delta_y, obstaculos_tiles):
         posicion_pantalla = [0, 0]
 
         if delta_x < 0 :
@@ -27,7 +27,21 @@ class Personaje():
             self.flip = False
 
         self.shape.x = self.shape.x + delta_x
+        for obstacle in obstaculos_tiles:
+            if obstacle[1].colliderect(self.shape):
+                if delta_x > 0:
+                    self.shape.right = obstacle[1].left
+                if delta_x < 0:
+                    self.shape.left = obstacle[1].right
+
         self.shape.y = self.shape.y + delta_y
+        for obstacle in obstaculos_tiles:
+            if obstacle[1].colliderect(self.shape):
+                if delta_y > 0:
+                    self.shape.bottom = obstacle[1].top
+                if delta_y < 0:
+                    self.shape.top = obstacle[1].bottom
+
 
         #Mueve la cámara de acuerdo a la posición del personaje
         if self.type == 1:
