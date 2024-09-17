@@ -186,10 +186,14 @@ while run:
     world.update(posicion_pantalla)
 
     player1.update()
+
+    # CUIDADO, EL YOUTUBER LO ARMA EN DRAW, YO LO ARMO EN UPDATE AL ENEMIGO
     for ene in lista_enemigos:
-        ene.enemigos(posicion_pantalla)
+        ene.enemigos(player1, world.obstaculos_tiles, posicion_pantalla)
         ene.update()
     bala = weapon1.update(player1)
+
+
     if bala:
         grupo_balas.add(bala)
     for bala in grupo_balas:

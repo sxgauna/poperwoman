@@ -1,5 +1,6 @@
 import pygame
 import constant
+import math
 
 class Personaje():
     def __init__(self, x, y, animaciones, energy, type):
@@ -66,9 +67,31 @@ class Personaje():
                 self.shape.top = constant.LIMITE_PANTALLA
             return posicion_pantalla
 
-    def enemigos(self, posicion_pantalla):
+    def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla):
+
+        ene_dx = 0
+        ene_dy = 0
+
         self.shape.x += posicion_pantalla[0]
         self.shape.y += posicion_pantalla[1]
+
+        #DISTANCIA CON EL JUGADOR
+        distancia = math.sqrt(((self.shape.centerx - jugador.shape.centerx)**2) +
+                             ((self.shape.centery - jugador.shape.centery)**2))
+
+        if distancia < constant.RANGO:
+            if self.shape.centerx > jugador.shape.centerx:
+                ene_dx = -constant.VELOCIDAD_ENEMIGOS
+            if self.shape.centerx < jugador.shape.centerx:
+                ene_dx = constant.VELOCIDAD_ENEMIGOS
+            if self.shape.centery > jugador.shape.centery:
+                ene_dy = -constant.VELOCIDAD_ENEMIGOS
+            if self.shape.centery < jugador.shape.centery:
+                ene_dy = constant.VELOCIDAD_ENEMIGOS
+
+        self.move(ene_dx, ene_dy,obstaculos_tiles)
+
+
 
     def update(self):
         if self.energy <= 0:
