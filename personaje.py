@@ -3,7 +3,7 @@ import constant
 import math
 
 class Personaje():
-    def __init__(self, x, y, animaciones, energy, type):
+    def __init__(self, x, y, animaciones, energy, tipo):
         self.score = 0
         self.energy = energy
         self.vivo = True
@@ -17,7 +17,11 @@ class Personaje():
 
         self.shape = self.image.get_rect()
         self.shape.center = (x,y)
-        self.type = type
+        self.tipo = tipo
+
+        self.golpe = False
+        self.ultimo_golpe = pygame.time.get_ticks()
+
 
     def move(self, delta_x, delta_y, obstaculos_tiles):
         posicion_pantalla = [0, 0]
@@ -45,7 +49,7 @@ class Personaje():
 
 
         #Mueve la cámara de acuerdo a la posición del personaje
-        if self.type == 1:
+        if self.tipo == 1:
             # Verificar límite derecho
             if self.shape.right > (constant.screen_width - constant.LIMITE_PANTALLA):
                 posicion_pantalla[0] = (constant.screen_width - constant.LIMITE_PANTALLA) - self.shape.right
@@ -68,18 +72,27 @@ class Personaje():
             return posicion_pantalla
 
     def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla):
-
+        clipped_line = []
         ene_dx = 0
         ene_dy = 0
 
         self.shape.x += posicion_pantalla[0]
         self.shape.y += posicion_pantalla[1]
 
+        #LINEA DE VISION
+        linea_de_vision = ((self.shape.centerx, self.shape.centery),
+                            (jugador.shape.centerx, jugador.shape.centery))
+
+        #CHEQUEO SI HAY OBSTACULO ENTRE LINEA DE VISION
+        for obs in obstaculos_tiles:
+            if obs[1].clipline(linea_de_vision):
+                clipped_line = obs[1].clipline(linea_de_vision)
+
         #DISTANCIA CON EL JUGADOR
         distancia = math.sqrt(((self.shape.centerx - jugador.shape.centerx)**2) +
                              ((self.shape.centery - jugador.shape.centery)**2))
 
-        if distancia < constant.RANGO:
+        if not clipped_line and distancia < constant.RANGO:
             if self.shape.centerx > jugador.shape.centerx:
                 ene_dx = -constant.VELOCIDAD_ENEMIGOS
             if self.shape.centerx < jugador.shape.centerx:
@@ -91,6 +104,11 @@ class Personaje():
 
         self.move(ene_dx, ene_dy,obstaculos_tiles)
 
+        #atacar al jugador
+        if distancia < constant.RANGO_ATK and jugador.golpe == False:
+            jugador.energy -= 10
+            jugador.golpe = True
+            jugador.ultimo_golpe = pygame.time.get_ticks()
 
 
     def update(self):
@@ -98,6 +116,14 @@ class Personaje():
             self.energy = 0
             self.vivo = False
             #self.kill no funciona todavia porque hay que armarlo
+
+
+        # CD para volver a recibir daño
+        golpe_cooldown = 1000
+        if self.tipo ==1:
+            if self.golpe == True:
+                if pygame.time.get_ticks() - self.ultimo_golpe > golpe_cooldown:
+                    self.golpe = False
 
 
         cooldown_animation = 100 #milisegundos
