@@ -41,7 +41,7 @@ class Mundo():
                     self.lista_item.append(pocion_roja)
             #ENEMIGO1
                 elif tile == 27:
-                    ene1 = Personaje(image_x, image_y, animaciones_enemigo[1], 250, 2)
+                    ene1 = Personaje(image_x, image_y, animaciones_enemigo[1], 100, 2)
                     tile_data[0] = tile_list[56]
                     self.lista_enemigo.append(ene1)
 

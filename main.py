@@ -191,15 +191,18 @@ while run:
     for ene in lista_enemigos:
         ene.enemigos(player1, world.obstaculos_tiles, posicion_pantalla)
         ene.update()
+
+
+
     bala = weapon1.update(player1)
 
 
     if bala:
         grupo_balas.add(bala)
     for bala in grupo_balas:
-        damage, pos_damage = bala.update(lista_enemigos)
+        damage, pos_damage = bala.update(lista_enemigos, world.obstaculos_tiles)
         if damage:
-            if damage <= 10:
+            if damage <= 25:
                 damage_text = DamageText(pos_damage.centerx, pos_damage.centery, "-" + str(damage), font, constant.YELLOW)
             else:
                 damage_text = DamageText(pos_damage.centerx, pos_damage.centery, "-" + str(damage), font, constant.RED)
@@ -212,8 +215,15 @@ while run:
     world.draw(screen)
 
     player1.draw(screen)
+
     for ene in lista_enemigos:
-        ene.draw(screen)
+        if ene.energy ==0:
+            lista_enemigos.remove(ene)
+        if ene.energy >0:
+            ene.draw(screen)
+
+
+
     weapon1.draw(screen)
     for bala in grupo_balas:
         bala.draw(screen)
