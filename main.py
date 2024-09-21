@@ -33,6 +33,18 @@ def vida_jugador():
         else:
             screen.blit(corazon_vacio, (5+i*50,15))
 
+def resetear_mundo():
+    grupo_damage_text.empty()
+    grupo_balas.empty()
+    grupo_items.empty()
+
+    data = []
+    for fila in range(constant.FILAS):
+        filas = [2] * constant.COLUMNAS
+        data.append(filas)
+    return data
+
+
 def dibujar_texto(texto, fuente, color, x, y):
     img = fuente.render(texto, True, color)
     screen.blit(img, (x,y))
@@ -88,7 +100,7 @@ for eni in tipo_enemigos:
         lista_temp.append(img_enemigo)
     animaciones_enemigo.append(lista_temp)
 
-# W O R L D - D A T A
+# W O R L D - D A T
 world_data = []
 
 #Si existiese algun valor falante en world_data mostramos un tile default
@@ -140,7 +152,7 @@ for item in world.lista_item:
 
 # C L A S S E S
 weapon1 = Weapon(imagen_pistola, imagen_bala)
-player1 = Personaje(500, 300, animaciones, 100, 1)
+player1 = Personaje(150, 150, animaciones, 100, 1)
 
 lista_enemigos = []
 for ene in world.lista_enemigo:
@@ -180,7 +192,7 @@ while run:
     if move_down:
         delta_y = constant.SPEED
 
-    posicion_pantalla = player1.move(delta_x, delta_y, world.obstaculos_tiles) #MOVER AL JUGADOR
+    posicion_pantalla, nivel_completado = player1.move(delta_x, delta_y, world.obstaculos_tiles, world.exit_tile) #MOVER AL JUGADOR
 
     # U P D A T E
     world.update(posicion_pantalla)
@@ -189,7 +201,7 @@ while run:
 
     # CUIDADO, EL YOUTUBER LO ARMA EN DRAW, YO LO ARMO EN UPDATE AL ENEMIGO
     for ene in lista_enemigos:
-        ene.enemigos(player1, world.obstaculos_tiles, posicion_pantalla)
+        ene.enemigos(player1, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
         ene.update()
 
 
@@ -233,6 +245,32 @@ while run:
 
     dibujar_texto(f"Score: {player1.score}", font, constant.BLUE, 1000, 5 )
     grupo_items.draw(screen)
+
+    #CHEQUEA SI EL NIVEL ESTÁ COMPLETADO
+    if nivel_completado == True:
+        if nivel < constant.NIVEL_MAXIMO:
+            nivel += 1
+            world_data = resetear_mundo()
+
+            #CARGA MUNDO LUEGO DE RESETEO
+            with open(f"assets//images//levels//level{nivel}.csv", newline='') as csvfile:
+                reader = csv.reader(csvfile, delimiter=',')
+                for x, fila in enumerate(reader):
+                    for y, columna in enumerate(fila):
+                        world_data[x][y] = int(columna)
+            world = Mundo()
+            world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
+            player1.actualizar_coordinadas((constant.COORDENADAS_SPAWN[str(nivel)]))
+
+            lista_enemigos = []
+            for ene in world.lista_enemigo:
+                lista_enemigos.append(ene)
+
+            for item in world.lista_item:
+                 grupo_items.add(item)
+
+
+
     dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
 
 
@@ -250,6 +288,13 @@ while run:
                 move_up = True
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 move_down = True
+            if event.key == pygame.K_e:
+                if world.cambiar_puerta(player1, tile_list):
+                    print("Puerta cambiada")
+
+
+
+
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                 move_left = False
@@ -259,6 +304,7 @@ while run:
                 move_up = False
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 move_down = False
+
     pygame.display.update()
 
 

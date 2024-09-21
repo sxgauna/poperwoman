@@ -23,8 +23,12 @@ class Personaje():
         self.ultimo_golpe = pygame.time.get_ticks()
 
 
-    def move(self, delta_x, delta_y, obstaculos_tiles):
+    def actualizar_coordinadas(self,tupla):
+        self.shape.center = (tupla[0], tupla[1])
+
+    def move(self, delta_x, delta_y, obstaculos_tiles, exit_tile):
         posicion_pantalla = [0, 0]
+        nivel_completado = False
 
         if delta_x < 0 :
             self.flip = True
@@ -50,6 +54,10 @@ class Personaje():
 
         #Mueve la cámara de acuerdo a la posición del personaje
         if self.tipo == 1:
+            #chequea colision con tile de salida.
+            if exit_tile is not None and len(exit_tile) > 1 and exit_tile[1].colliderect(self.shape):
+                nivel_completado = True
+
             # Verificar límite derecho
             if self.shape.right > (constant.screen_width - constant.LIMITE_PANTALLA):
                 posicion_pantalla[0] = (constant.screen_width - constant.LIMITE_PANTALLA) - self.shape.right
@@ -69,9 +77,9 @@ class Personaje():
             if self.shape.top < constant.LIMITE_PANTALLA:
                 posicion_pantalla[1] = constant.LIMITE_PANTALLA - self.shape.top
                 self.shape.top = constant.LIMITE_PANTALLA
-            return posicion_pantalla
+            return posicion_pantalla, nivel_completado
 
-    def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla):
+    def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla, exit_tile):
         clipped_line = []
         ene_dx = 0
         ene_dy = 0
@@ -102,7 +110,7 @@ class Personaje():
             if self.shape.centery < jugador.shape.centery:
                 ene_dy = constant.VELOCIDAD_ENEMIGOS
 
-        self.move(ene_dx, ene_dy,obstaculos_tiles)
+        self.move(ene_dx, ene_dy,obstaculos_tiles, exit_tile)
 
         #atacar al jugador
         if distancia < constant.RANGO_ATK and jugador.golpe == False:
