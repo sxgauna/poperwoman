@@ -57,19 +57,22 @@ def dibujar_grid():
 
 def pantalla_inicio():
     screen.fill(constant.BLUE)
-    dibujar_texto("Mi primer juego", font_titulo, constant.WHITE,
-            constant.screen_width/2-200 ,constant.screen_height/2-200)
-    pygame.draw.rect(screen, constant.YELLOW,boton_jugar)
-    pygame.draw.rect(screen, constant.RED,boton_salir)
+    dibujar_texto("Poperman", font_titulo, constant.WHITE,
+            constant.screen_width / 2 - 200,
+            constant.screen_height / 2 - 200)
+    pygame.draw.rect(screen, constant.YELLOW, boton_jugar)
+    pygame.draw.rect(screen, constant.RED, boton_salir)
     screen.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
-
+    screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+    pygame.display.update()
 
 # I N I T
 pygame.init()
+pygame.mixer.init()
+
 font = pygame.font.Font("assets//fonts//font1.otf", 35)
 font_game_over = pygame.font.Font("assets//fonts//font1.otf", 100)
 font_reinicio = pygame.font.Font("assets//fonts//font1.otf", 10)
-
 font_inicio = pygame.font.Font("assets//fonts//font1.otf",30)
 font_titulo = pygame.font.Font("assets//fonts//font1.otf",80)
 #font.Font("assets//fonts//font1.otf", 75)
@@ -77,14 +80,16 @@ font_titulo = pygame.font.Font("assets//fonts//font1.otf",80)
 game_over_text = font_game_over.render('Game Over', True, constant.WHITE)
 texto_boton_reinicio = font_game_over.render('Reiniciar', True, constant.BLACK)
 
-texto_boton_jugar = font_inicio.render('Jugar', True, constant.WHITE)
+texto_boton_jugar = font_inicio.render('Jugar', True, constant.BLACK)
 texto_boton_salir = font_inicio.render('Salir', True, constant.WHITE)
 
 
+#Botones de inicio
+boton_jugar = pygame.Rect(constant.screen_width / 2 - 100,
+                            constant.screen_height/2 - 50, 200, 50)
 
-boton_jugar = pygame.Rect(constant.screen_width/2 - 100, constant.screen_width/2 -5, 200,50)
-
-boton_salir = pygame.Rect(constant.screen_width/2 - 100, constant.screen_width/2 + 50, 200,50)
+boton_salir = pygame.Rect(constant.screen_width/2 - 100,
+                             constant.screen_height/2 + 50, 200,50)
 
 screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
 pygame.display.set_caption("Poperman")
@@ -196,22 +201,36 @@ clock = pygame.time.Clock()
 
 boton_reinicio = pygame.Rect(constant.screen_width/ 2 - 100, constant.screen_height/2 + 100, 200, 50)
 
+# M U S I C
+
+pygame.mixer.music.load("assets/music/Level1.mp3")
+pygame.mixer.music.play(-1)
+
+sonido_disparo = pygame.mixer.Sound("assets/sounds/s1.mp3")
+
+
 #R U N
+
 mostrar_inicio = True
 run = True
-
 while run:
-    if mostrar_inicio == "eliminar mañana domingo":
+    if mostrar_inicio:
         pantalla_inicio()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if boton_jugar.collidepoint(evento.pos):
-                    mostrar.inicio = False()
+                if boton_jugar.collidepoint(event.pos):
+                    mostrar_inicio = False
+                if boton_salir.collidepoint(event.pos):
+                    run = False
+
+
         clock.tick(constant.FPS)
         screen.fill(constant.BLACK)
         dibujar_grid()
+
     else:
 
         if player1.vivo:
@@ -250,6 +269,7 @@ while run:
 
             if bala:
                 grupo_balas.add(bala)
+                sonido_disparo.play()
             for bala in grupo_balas:
                 damage, pos_damage = bala.update(lista_enemigos, world.obstaculos_tiles)
                 if damage:
