@@ -82,7 +82,7 @@ class Bullet(pygame.sprite.Sprite):
         #Verifica coalición con enemigo
         for enemigo in lista_enemigos:
             if enemigo.shape.colliderect(self.rect):
-                damage = 25 + random.randint(-7,7)
+                damage = 50 + random.randint(-7,7)
                 pos_damage = enemigo.shape
                 enemigo.energy -= damage
                 self.kill()
