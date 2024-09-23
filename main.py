@@ -9,7 +9,7 @@ from items import Item
 from world import Mundo
 
 
-# D E F
+#DEF
 def escalar_img(image,scale):
     w = image.get_width()
     h = image.get_height()
@@ -34,14 +34,19 @@ def vida_jugador():
             screen.blit(corazon_vacio, (5+i*50,15))
 
 def resetear_mundo():
+    screen.fill(constant.BLACK)
     grupo_damage_text.empty()
     grupo_balas.empty()
     grupo_items.empty()
+
+    player1.score = 0
+    player1.energy = 100
 
     data = []
     for fila in range(constant.FILAS):
         filas = [2] * constant.COLUMNAS
         data.append(filas)
+
     return data
 
 
@@ -56,35 +61,34 @@ def dibujar_grid():
         pygame.draw.line(screen, constant.WHITE, (0, i * constant.GRID_SIZE),(constant.screen_width, i * constant.GRID_SIZE))
 
 def pantalla_inicio():
-    screen.fill(constant.BLUE)
-    dibujar_texto("Poperman", font_titulo, constant.WHITE,
-            constant.screen_width / 2 - 200,
-            constant.screen_height / 2 - 200)
-    pygame.draw.rect(screen, constant.YELLOW, boton_jugar)
-    pygame.draw.rect(screen, constant.RED, boton_salir)
+    screen.fill(constant.BLACK)
+    dibujar_texto("Midnight Popcorn", font_titulo, constant.RED,
+            constant.screen_width / 2 - font_titulo.size("Midnight Popcorn")[0] / 2,
+            constant.screen_height / 2 - 300)
+    pygame.draw.rect(screen, constant.ROJO_OSCURO, boton_jugar)
+    pygame.draw.rect(screen, constant.ROJO_OSCURO, boton_salir)
     screen.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
     screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
     pygame.display.update()
 
-# I N I T
+#INIT
 pygame.init()
 pygame.mixer.init()
 
 font = pygame.font.Font("assets//fonts//font1.otf", 35)
-font_game_over = pygame.font.Font("assets//fonts//font1.otf", 100)
-font_reinicio = pygame.font.Font("assets//fonts//font1.otf", 10)
+font_game_over = pygame.font.Font("assets//fonts//font1.otf", 80)
+font_reinicio = pygame.font.Font("assets//fonts//font1.otf", 30)
 font_inicio = pygame.font.Font("assets//fonts//font1.otf",30)
-font_titulo = pygame.font.Font("assets//fonts//font1.otf",80)
-#font.Font("assets//fonts//font1.otf", 75)
+font_titulo = pygame.font.Font("assets//fonts//font2.ttf",80)
 
-game_over_text = font_game_over.render('Game Over', True, constant.WHITE)
-texto_boton_reinicio = font_game_over.render('Reiniciar', True, constant.BLACK)
+game_over_text = font_game_over.render('YOU ARE DEAD!', True, constant.WHITE)
+texto_boton_reinicio = font_reinicio.render('RESET', True, constant.WHITE)
 
-texto_boton_jugar = font_inicio.render('Jugar', True, constant.BLACK)
-texto_boton_salir = font_inicio.render('Salir', True, constant.WHITE)
+texto_boton_jugar = font_inicio.render('PLAY', True, constant.WHITE)
+texto_boton_salir = font_inicio.render('QUIT', True, constant.WHITE)
 
 
-#Botones de inicio
+#BUTTONS
 boton_jugar = pygame.Rect(constant.screen_width / 2 - 100,
                             constant.screen_height/2 - 50, 200, 50)
 
@@ -92,12 +96,12 @@ boton_salir = pygame.Rect(constant.screen_width/2 - 100,
                              constant.screen_height/2 + 50, 200,50)
 
 screen = pygame.display.set_mode((constant.screen_width, constant.screen_height), pygame.RESIZABLE)
-pygame.display.set_caption("Poperman")
+pygame.display.set_caption("Midnight Popcorn")
 posicion_pantalla = [0, 0]
 nivel = 1
 
 
-# NI IDEA, COSAS QUE PONE EL CHABON
+#ITEMS
 tile_list = []
 for i in range (constant.TILE_TYPES):
     tile_image = pygame.image.load(f"assets//images//tiles//tile ({ i }).png")
@@ -133,10 +137,10 @@ for eni in tipo_enemigos:
         lista_temp.append(img_enemigo)
     animaciones_enemigo.append(lista_temp)
 
-# W O R L D - D A T
+#WORLD
 world_data = []
 
-#Si existiese algun valor falante en world_data mostramos un tile default
+#TILE DEFAULT
 for fila in range(constant.FILAS):
     filas =  [5] * constant.COLUMNAS
     world_data.append(filas)
@@ -150,7 +154,7 @@ with open("assets//images//levels//level1.csv", newline='') as csvfile:
 world = Mundo()
 world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
 
-# S P R I T E S
+#SPRITES
 animaciones = []
 for i in range (7):
     img = pygame.image.load(f"assets//images//characters//player1//char{i}.png").convert_alpha()
@@ -173,7 +177,7 @@ corazon_lleno = pygame.image.load(f"assets//images//items//h2.png").convert_alph
 corazon_lleno = escalar_img(corazon_lleno, constant.HEART_ESCALA)
 
 
-# G R O U P S
+#GROUPS
 
 grupo_damage_text = pygame.sprite.Group() # TEXTO - DAMAGE TEXT
 grupo_balas = pygame.sprite.Group()
@@ -183,7 +187,7 @@ for item in world.lista_item:
     grupo_items.add(item)
 
 
-# C L A S S E S
+#CLASSES
 weapon1 = Weapon(imagen_pistola, imagen_bala)
 player1 = Personaje(150, 150, animaciones, 100, 1)
 
@@ -192,16 +196,17 @@ for ene in world.lista_enemigo:
     lista_enemigos.append(ene)
 
 
-# M O V E
+#MOVE
 move_up = False
 move_down = False
 move_right = False
 move_left = False
 clock = pygame.time.Clock()
 
-boton_reinicio = pygame.Rect(constant.screen_width/ 2 - 100, constant.screen_height/2 + 100, 200, 50)
+boton_reinicio = pygame.Rect(constant.screen_width / 2 - 100,
+                            constant.screen_height/2 - 50, 200, 50)
 
-# M U S I C
+#MUSIC
 
 pygame.mixer.music.load("assets/music/Level1.mp3")
 pygame.mixer.music.play(-1)
@@ -209,7 +214,7 @@ pygame.mixer.music.play(-1)
 sonido_disparo = pygame.mixer.Sound("assets/sounds/s1.mp3")
 
 
-#R U N
+#RUN
 
 mostrar_inicio = True
 run = True
@@ -229,7 +234,7 @@ while run:
 
         clock.tick(constant.FPS)
         screen.fill(constant.BLACK)
-        dibujar_grid()
+        #dibujar_grid()
 
     else:
 
@@ -257,12 +262,9 @@ while run:
 
             player1.update()
 
-            # CUIDADO, EL YOUTUBER LO ARMA EN DRAW, YO LO ARMO EN UPDATE AL ENEMIGO
             for ene in lista_enemigos:
                 ene.enemigos(player1, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
                 ene.update()
-
-
 
             bala = weapon1.update(player1)
 
@@ -281,7 +283,7 @@ while run:
             grupo_damage_text.update(posicion_pantalla)
             grupo_items.update(posicion_pantalla, player1)
 
-        # D R A W
+        #DRAW
 
         world.draw(screen)
 
@@ -330,15 +332,20 @@ while run:
 
         dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
 
+        #REVISAR
+
         if player1.vivo == False:
             screen.fill(constant.ROJO_OSCURO)
-            text_rect = game_over_text.get_rect(center=(constant.screen_width/ 2,
-                                                        constant.screen_height/2))
+            text_rect = game_over_text.get_rect(center=(constant.screen_width / 2, constant.screen_height / 2 - 300))
+
+            pygame.draw.rect(screen, constant.BLACK, boton_reinicio)
+            pygame.draw.rect(screen, constant.BLACK, boton_salir)
+
             screen.blit(game_over_text, text_rect)
-
-
-            pygame.draw.rect(screen, constant.YELLOW, boton_reinicio)
-            screen.blit(texto_boton_reinicio, (boton_reinicio.x +50, boton_reinicio.y + 10))
+            screen.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
+            screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+            if boton_salir.collidepoint(event.pos):
+                run = False
 
 
         # E V E N T S
@@ -358,9 +365,6 @@ while run:
                 if event.key == pygame.K_e:
                     if world.cambiar_puerta(player1, tile_list):
                         print("Puerta cambiada")
-
-
-
 
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a or event.key == pygame.K_LEFT:
@@ -396,11 +400,6 @@ while run:
                             for item in world.lista_item:
                                 grupo_items.add(item)
 
-
-
-
         pygame.display.update()
-
-
 
 pygame.quit()

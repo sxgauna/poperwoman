@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "test-map-3.tmx",
+    "activeFile": "test-map-1.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -29,7 +29,7 @@
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 240.6454091432962,
-                "y": 158.58624663849406
+                "y": -18.440261237034207
             }
         },
         "test-map-2.tmx": {
@@ -66,9 +66,9 @@
     ],
     "project": "untitled.tiled-project",
     "recentFiles": [
-        "test-map-1.tmx",
-        "test-map-2.tmx",
         "test-map-3.tmx",
+        "test-map-2.tmx",
+        "test-map-1.tmx",
         "supertileset.tsx",
         "map.tsx"
     ],
