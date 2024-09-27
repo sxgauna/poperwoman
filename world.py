@@ -3,9 +3,10 @@ import constant
 from items import Item
 from personaje import Personaje
 
-obstaculos = [0, 2, 72, 19, 20, 21, 22, 23, 24,28,
-90,91,92,93,94,95,96,97,6, 7,
-79,61,72,43,25,7,72,54,36,18 ]
+obstaculos = [0, 2, 6, 7, 72, 19,
+20, 21, 22, 23, 24, 28, 90, 91, 92,
+93, 94, 95, 96, 97, 79, 61, 72, 43,
+25, 72, 54, 36, 18 ]
 
 puertas_cerradas = [28]
 
@@ -14,7 +15,6 @@ class Mundo():
     def __init__(self):
         self.map_tiles = []
         self.obstaculos_tiles = []
-
         self.lista_item = []
         self.lista_enemigo = []
         self.puertas_cerradas_tiles = []
@@ -32,7 +32,6 @@ class Mundo():
                 tile_data = [image, image_rect, image_x, image_y, tile]
                 if tile in obstaculos:
                     self.obstaculos_tiles.append(tile_data)
-
                 if tile in obstaculos:
                     self.puertas_cerradas_tiles.append(tile_data)
                 elif tile == 29:
@@ -54,9 +53,8 @@ class Mundo():
                     tile_data[0] = tile_list[56]
                     self.lista_enemigo.append(ene1)
 
-
-
                 self.map_tiles.append(tile_data)
+
 
     def cambiar_puerta(self, jugador, tile_list):
         buffer = 50
@@ -77,7 +75,6 @@ class Mundo():
 
                     return True
         return False
-
 
 
     def update(self, posicion_pantalla):

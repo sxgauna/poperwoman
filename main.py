@@ -8,8 +8,6 @@ from weapons import Weapon
 from items import Item
 from world import Mundo
 
-
-#DEF
 def escalar_img(image,scale):
     w = image.get_width()
     h = image.get_height()
@@ -46,19 +44,12 @@ def resetear_mundo():
     for fila in range(constant.FILAS):
         filas = [2] * constant.COLUMNAS
         data.append(filas)
-
     return data
 
 
 def dibujar_texto(texto, fuente, color, x, y):
     img = fuente.render(texto, True, color)
     screen.blit(img, (x,y))
-()
-
-def dibujar_grid():
-    for i in range(30):
-        pygame.draw.line(screen, constant.WHITE, (i * constant.GRID_SIZE, 0),(i * constant.GRID_SIZE,constant.screen_height))
-        pygame.draw.line(screen, constant.WHITE, (0, i * constant.GRID_SIZE),(constant.screen_width, i * constant.GRID_SIZE))
 
 def pantalla_inicio():
     screen.fill(constant.BLACK)
@@ -68,6 +59,26 @@ def pantalla_inicio():
     pygame.draw.rect(screen, constant.ROJO_OSCURO, boton_jugar)
     pygame.draw.rect(screen, constant.ROJO_OSCURO, boton_salir)
     screen.blit(texto_boton_jugar, (boton_jugar.x + 50, boton_jugar.y + 10))
+    screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+    pygame.display.update()
+
+def pantalla_fin():
+    pause = True
+    screen.fill(constant.BLACK)
+    dibujar_texto("Epic! You won!", font_titulo, constant.RED,
+            constant.screen_width / 2 - font_titulo.size("Epic! You won!")[0] / 2,
+            constant.screen_height / 2 - 300)
+    pygame.display.update()
+
+def pantalla_muerte():
+    screen.fill(constant.ROJO_OSCURO)
+    text_rect = game_over_text.get_rect(center=(constant.screen_width / 2, constant.screen_height / 2 - 300))
+
+    pygame.draw.rect(screen, constant.BLACK, boton_reinicio)
+    pygame.draw.rect(screen, constant.BLACK, boton_salir)
+
+    screen.blit(game_over_text, text_rect)
+    screen.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
     screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
     pygame.display.update()
 
@@ -83,7 +94,6 @@ font_titulo = pygame.font.Font("assets//fonts//font2.ttf",80)
 
 game_over_text = font_game_over.render('YOU ARE DEAD!', True, constant.WHITE)
 texto_boton_reinicio = font_reinicio.render('RESET', True, constant.WHITE)
-
 texto_boton_jugar = font_inicio.render('PLAY', True, constant.WHITE)
 texto_boton_salir = font_inicio.render('QUIT', True, constant.WHITE)
 
@@ -99,7 +109,6 @@ screen = pygame.display.set_mode((constant.screen_width, constant.screen_height)
 pygame.display.set_caption("Midnight Popcorn")
 posicion_pantalla = [0, 0]
 nivel = 1
-
 
 #ITEMS
 tile_list = []
@@ -120,8 +129,6 @@ for i in range(num_coin_images):
     coin_images.append(img)
 
 item_imagenes = [coin_images, [poti_roja]]
-
-
 
 directorio_enemigos = "assets//images//characters//enemies"
 tipo_enemigos = nombre_carpetas(directorio_enemigos)
@@ -217,6 +224,8 @@ sonido_disparo = pygame.mixer.Sound("assets/sounds/s1.mp3")
 #RUN
 
 mostrar_inicio = True
+pause = False
+
 run = True
 while run:
     if mostrar_inicio:
@@ -234,7 +243,6 @@ while run:
 
         clock.tick(constant.FPS)
         screen.fill(constant.BLACK)
-        #dibujar_grid()
 
     else:
 
@@ -309,8 +317,9 @@ while run:
 
         #CHEQUEA SI EL NIVEL ESTÁ COMPLETADO
         if nivel_completado == True:
-            if nivel <= constant.NIVEL_MAXIMO:
+            if nivel < constant.NIVEL_MAXIMO:
                 nivel += 1
+                dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
                 world_data = resetear_mundo()
 
                 #CARGA MUNDO LUEGO DE RESETEO
@@ -320,32 +329,22 @@ while run:
                         for y, columna in enumerate(fila):
                             world_data[x][y] = int(columna)
                 world = Mundo()
+                screen.fill(constant.BLACK)
                 world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
                 player1.actualizar_coordinadas((constant.COORDENADAS_SPAWN[str(nivel)]))
 
                 lista_enemigos = []
                 for ene in world.lista_enemigo:
                     lista_enemigos.append(ene)
-
                 for item in world.lista_item:
                      grupo_items.add(item)
-
-        dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
+            else:
+                pantalla_fin()
 
         #REVISAR
 
         if player1.vivo == False:
-            screen.fill(constant.ROJO_OSCURO)
-            text_rect = game_over_text.get_rect(center=(constant.screen_width / 2, constant.screen_height / 2 - 300))
-
-            pygame.draw.rect(screen, constant.BLACK, boton_reinicio)
-            pygame.draw.rect(screen, constant.BLACK, boton_salir)
-
-            screen.blit(game_over_text, text_rect)
-            screen.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
-            screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
-            if boton_salir.collidepoint(event.pos):
-                run = False
+            pantalla_muerte()
 
 
         # E V E N T S
@@ -353,7 +352,7 @@ while run:
             if event.type == pygame.QUIT:
                 run = False
 
-            elif event.type == pygame.KEYDOWN:
+            elif (pause == False) and (event.type == pygame.KEYDOWN):
                 if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     move_left = True
                 if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
@@ -363,10 +362,9 @@ while run:
                 if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                     move_down = True
                 if event.key == pygame.K_e:
-                    if world.cambiar_puerta(player1, tile_list):
-                        print("Puerta cambiada")
+                    world.cambiar_puerta(player1, tile_list)
 
-            elif event.type == pygame.KEYUP:
+            elif (pause == False) and (event.type == pygame.KEYUP):
                 if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                     move_left = False
                 if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
@@ -376,30 +374,33 @@ while run:
                 if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                     move_down = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if boton_reinicio.collidepoint(event.pos) and not player1.vivo:
-                    player1.vivo =True
-                    player1.energy = 100
-                    player1.score =0
-                    nivel = 1
-                    world_data = resetear_mundo()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Solo el botón izquierdo del ratón
+                    if boton_reinicio.collidepoint(event.pos) and not player1.vivo:
+                        player1.vivo =True
+                        player1.energy = 100
+                        player1.score =0
+                        nivel = 1
+                        world_data = resetear_mundo()
 
-            #CARGA MUNDO LUEGO DE RESETEO
-                    with open(f"assets//images//levels//level{nivel}.csv", newline='') as csvfile:
-                        reader = csv.reader(csvfile, delimiter=',')
+                        #CARGA MUNDO LUEGO DE RESETEO
+                        with open(f"assets//images//levels//level{nivel}.csv", newline='') as csvfile:
+                            reader = csv.reader(csvfile, delimiter=',')
                         for x, fila in enumerate(reader):
                             for y, columna in enumerate(fila):
                                 world_data[x][y] = int(columna)
+
                                 world = Mundo()
                                 world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
-                                player1.actualizar_coordinadas((constant.COORDENADAS_SPAWN[str(nivel)]))
+                                player1.actualizar_coordinadas(constant.COORDENADAS_SPAWN[str(nivel)])
 
-                            lista_enemigos = []
-                            for ene in world.lista_enemigo:
-                                lista_enemigos.append(ene)
-                            for item in world.lista_item:
-                                grupo_items.add(item)
-
+                        # Reinicia la lista de enemigos y objetos
+                        lista_enemigos = []
+                        for ene in world.lista_enemigo:
+                            lista_enemigos.append(ene)
+                        grupo_items.empty()  # Limpia el grupo antes de agregar nuevos items
+                        for item in world.lista_item:
+                            grupo_items.add(item)
         pygame.display.update()
 
 pygame.quit()

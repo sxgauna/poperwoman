@@ -88,18 +88,12 @@ class Bullet(pygame.sprite.Sprite):
                 self.kill()
                 break
 
-
         #Verifica coalición con paredes
         for obs in obstaculos_tiles:
             if obs[1].colliderect(self.rect):
                 self.kill()
                 break
-
         return damage, pos_damage
-
 
     def draw(self, interfaz):
         interfaz.blit(self.image, (self.rect.centerx, self.rect.centery))
-
-
-

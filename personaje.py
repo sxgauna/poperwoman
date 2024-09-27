@@ -30,54 +30,51 @@ class Personaje():
         posicion_pantalla = [0, 0]
         nivel_completado = False
 
-        if delta_x < 0 :
-            self.flip = True
-        if delta_x > 0 :
-            self.flip = False
+        # Verificar si el personaje se mueve hacia la izquierda o derecha para ajustar la dirección del sprite
+        self.flip = delta_x < 0
 
-        self.shape.x = self.shape.x + delta_x
+        # Movimiento en el eje X
+        self.shape.x += delta_x
         for obstacle in obstaculos_tiles:
             if obstacle[1].colliderect(self.shape):
-                if delta_x > 0:
+                if delta_x > 0:  # Moviendo hacia la derecha
                     self.shape.right = obstacle[1].left
-                if delta_x < 0:
+                elif delta_x < 0:  # Moviendo hacia la izquierda
                     self.shape.left = obstacle[1].right
 
-        self.shape.y = self.shape.y + delta_y
+        # Movimiento en el eje Y
+        self.shape.y += delta_y
         for obstacle in obstaculos_tiles:
             if obstacle[1].colliderect(self.shape):
-                if delta_y > 0:
+                if delta_y > 0:  # Moviendo hacia abajo
                     self.shape.bottom = obstacle[1].top
-                if delta_y < 0:
+                elif delta_y < 0:  # Moviendo hacia arriba
                     self.shape.top = obstacle[1].bottom
 
-
-        #Mueve la cámara de acuerdo a la posición del personaje
+        # Mover la cámara según la posición del personaje y los límites
         if self.tipo == 1:
-            #chequea colision con tile de salida.
-            if exit_tile is not None and len(exit_tile) > 1 and exit_tile[1].colliderect(self.shape):
+            # Chequear si el personaje ha alcanzado el tile de salida
+            if exit_tile is not None and exit_tile[1].colliderect(self.shape):
                 nivel_completado = True
 
-            # Verificar límite derecho
+            # Ajustar la posición de la cámara (posicion_pantalla) basada en los límites de la pantalla
             if self.shape.right > (constant.screen_width - constant.LIMITE_PANTALLA):
                 posicion_pantalla[0] = (constant.screen_width - constant.LIMITE_PANTALLA) - self.shape.right
                 self.shape.right = constant.screen_width - constant.LIMITE_PANTALLA
 
-            # Verificar límite izquierdo
-            if self.shape.left < constant.LIMITE_PANTALLA:
+            elif self.shape.left < constant.LIMITE_PANTALLA:
                 posicion_pantalla[0] = constant.LIMITE_PANTALLA - self.shape.left
                 self.shape.left = constant.LIMITE_PANTALLA
 
-            # Verificar límite inferior
             if self.shape.bottom > (constant.screen_height - constant.LIMITE_PANTALLA):
                 posicion_pantalla[1] = (constant.screen_height - constant.LIMITE_PANTALLA) - self.shape.bottom
                 self.shape.bottom = constant.screen_height - constant.LIMITE_PANTALLA
 
-            # Verificar límite superior
-            if self.shape.top < constant.LIMITE_PANTALLA:
+            elif self.shape.top < constant.LIMITE_PANTALLA:
                 posicion_pantalla[1] = constant.LIMITE_PANTALLA - self.shape.top
                 self.shape.top = constant.LIMITE_PANTALLA
-            return posicion_pantalla, nivel_completado
+
+        return posicion_pantalla, nivel_completado
 
     def enemigos(self, jugador, obstaculos_tiles, posicion_pantalla, exit_tile):
         clipped_line = []
@@ -123,8 +120,6 @@ class Personaje():
         if self.energy <= 0:
             self.energy = 0
             self.vivo = False
-            #self.kill no funciona todavia porque hay que armarlo
-
 
         # CD para volver a recibir daño
         golpe_cooldown = 1000
@@ -132,7 +127,6 @@ class Personaje():
             if self.golpe == True:
                 if pygame.time.get_ticks() - self.ultimo_golpe > golpe_cooldown:
                     self.golpe = False
-
 
         cooldown_animation = 100 #milisegundos
         self.image = self.animaciones[self.frame_index]
