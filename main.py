@@ -239,13 +239,10 @@ while run:
                     mostrar_inicio = False
                 if boton_salir.collidepoint(event.pos):
                     run = False
-
-
         clock.tick(constant.FPS)
         screen.fill(constant.BLACK)
 
     else:
-
         if player1.vivo:
             #Movimiento del jugador
             delta_x = 0
@@ -267,16 +264,11 @@ while run:
 
             # U P D A T E
             world.update(posicion_pantalla)
-
             player1.update()
-
             for ene in lista_enemigos:
                 ene.enemigos(player1, world.obstaculos_tiles, posicion_pantalla, world.exit_tile)
                 ene.update()
-
             bala = weapon1.update(player1)
-
-
             if bala:
                 grupo_balas.add(bala)
                 sonido_disparo.play()
@@ -292,19 +284,13 @@ while run:
             grupo_items.update(posicion_pantalla, player1)
 
         #DRAW
-
         world.draw(screen)
-
         player1.draw(screen)
-
         for ene in lista_enemigos:
             if ene.energy ==0:
                 lista_enemigos.remove(ene)
             if ene.energy >0:
                 ene.draw(screen)
-
-
-
         weapon1.draw(screen)
         for bala in grupo_balas:
             bala.draw(screen)
@@ -312,14 +298,14 @@ while run:
 
         vida_jugador()
 
+        dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
         dibujar_texto(f"Score: {player1.score}", font, constant.BLUE, 1000, 5 )
         grupo_items.draw(screen)
 
-        #CHEQUEA SI EL NIVEL ESTÁ COMPLETADO
+        #Verifica si el nivel está completado
         if nivel_completado == True:
             if nivel < constant.NIVEL_MAXIMO:
                 nivel += 1
-                dibujar_texto(f"Nivel: " + str(nivel), font, constant.WHITE, constant.screen_width /2, 5)
                 world_data = resetear_mundo()
 
                 #CARGA MUNDO LUEGO DE RESETEO
@@ -374,7 +360,7 @@ while run:
                 if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                     move_down = False
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif (pause == False) and (event.type == pygame.MOUSEBUTTONDOWN):
                 if event.button == 1:  # Solo el botón izquierdo del ratón
                     if boton_reinicio.collidepoint(event.pos) and not player1.vivo:
                         player1.vivo =True
