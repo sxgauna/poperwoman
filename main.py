@@ -32,6 +32,10 @@ def vida_jugador():
             screen.blit(corazon_vacio, (5+i*50,15))
 
 def resetear_mundo():
+    player1.vivo = True
+    player1.energy = 100
+    player1.score = 0
+    nivel = 1
     screen.fill(constant.BLACK)
     grupo_damage_text.empty()
     grupo_balas.empty()
@@ -63,12 +67,24 @@ def pantalla_inicio():
     pygame.display.update()
 
 def pantalla_fin():
+    start_time = pygame.time.get_ticks()  # Record the time when the function is called
     pause = True
-    screen.fill(constant.BLACK)
-    dibujar_texto("Epic! You won!", font_titulo, constant.RED,
-            constant.screen_width / 2 - font_titulo.size("Epic! You won!")[0] / 2,
-            constant.screen_height / 2 - 300)
-    pygame.display.update()
+    while pause:
+        current_time = pygame.time.get_ticks()  # Get the current time
+        screen.fill(constant.BLACK)
+
+        dibujar_texto("Epic! You won!", font_titulo, constant.RED,
+                constant.screen_width / 2 - font_titulo.size("Epic! You won!")[0] / 2,
+                constant.screen_height / 2 - 300)
+
+        pygame.display.update()
+
+        # Check if 30 seconds have passed (10,000 milliseconds)
+        if current_time - start_time >= 10000:
+            pause = False
+            pygame.quit()
+            sys.exit()
+
 
 def pantalla_muerte():
     screen.fill(constant.ROJO_OSCURO)
@@ -80,7 +96,24 @@ def pantalla_muerte():
     screen.blit(game_over_text, text_rect)
     screen.blit(texto_boton_reinicio, (boton_reinicio.x + 50, boton_reinicio.y + 10))
     screen.blit(texto_boton_salir, (boton_salir.x + 50, boton_salir.y + 10))
+
+    # Detectar eventos
+    for event in pygame.event.get():
+        print(event)  # Print every event for debugging purposes
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(f"Mouse button down detected at position: {event.pos}")  # Debug the mouse click
+            if boton_reinicio.collidepoint(event.pos):
+                print("Restart button clicked")
+                world_data = resetear_mundo()
+
+            elif boton_salir.collidepoint(event.pos):
+                print("Quit button clicked")
+                pygame.quit()
+                sys.exit()
+
     pygame.display.update()
+
+
 
 #INIT
 pygame.init()
@@ -327,11 +360,6 @@ while run:
             else:
                 pantalla_fin()
 
-        #REVISAR
-
-        if player1.vivo == False:
-            pantalla_muerte()
-
 
         # E V E N T S
         for event in pygame.event.get():
@@ -363,22 +391,18 @@ while run:
             elif (pause == False) and (event.type == pygame.MOUSEBUTTONDOWN):
                 if event.button == 1:  # Solo el botón izquierdo del ratón
                     if boton_reinicio.collidepoint(event.pos) and not player1.vivo:
-                        player1.vivo =True
-                        player1.energy = 100
-                        player1.score =0
-                        nivel = 1
                         world_data = resetear_mundo()
 
                         #CARGA MUNDO LUEGO DE RESETEO
                         with open(f"assets//images//levels//level{nivel}.csv", newline='') as csvfile:
                             reader = csv.reader(csvfile, delimiter=',')
-                        for x, fila in enumerate(reader):
-                            for y, columna in enumerate(fila):
-                                world_data[x][y] = int(columna)
+                            for x, fila in enumerate(reader):
+                                for y, columna in enumerate(fila):
+                                    world_data[x][y] = int(columna)
 
-                                world = Mundo()
-                                world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
-                                player1.actualizar_coordinadas(constant.COORDENADAS_SPAWN[str(nivel)])
+                                    world = Mundo()
+                                    world.process_data(world_data, tile_list, item_imagenes, animaciones_enemigo)
+                                    player1.actualizar_coordinadas(constant.COORDENADAS_SPAWN[str(nivel)])
 
                         # Reinicia la lista de enemigos y objetos
                         lista_enemigos = []
@@ -387,6 +411,10 @@ while run:
                         grupo_items.empty()  # Limpia el grupo antes de agregar nuevos items
                         for item in world.lista_item:
                             grupo_items.add(item)
+
+        if player1.vivo == False:
+            pantalla_muerte()
+
         pygame.display.update()
 
 pygame.quit()
